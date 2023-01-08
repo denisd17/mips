@@ -1,0 +1,60 @@
+.data
+	v: .word 1, 2, 1, 4, 1, 2, 4, 3, 4, 1, 5
+	n: .word 11
+	sp: .asciiz " "
+	max: .asciiz "Maximul este: "
+	ap: .asciiz " nr. aparitii = "
+.text
+
+main:
+	lw $t0, n	#incarcam in t0 valoarea lui n
+	li $t1, 0	#contor
+	li $t2, 0	#folosit ptr indexare (din 4 in 4)
+	li $t3, 0 	#vom stoca in el val maximului
+	li $t4, 0	#stocam nr de aparitii ale maximului
+	
+loop:
+	beq $t1, $t0, exit
+	
+	lw $t5, v($t2)
+	
+	bgt $t5, $t3, nou_maxim
+	
+	beq $t5, $t3, incrementare
+	
+	j continue
+
+incrementare:
+	addi $t4, $t4, 1
+	j continue
+
+nou_maxim:
+	move $t3, $t5
+	li $t4, 1
+	j continue
+
+continue:
+	addi $t1, $t1, 1
+	addi $t2, $t2, 4
+	j loop
+	
+exit:
+	li $v0, 4
+	la $a0, max
+	syscall
+	
+	li $v0, 1
+	move $a0, $t3
+	syscall
+	
+	li $v0, 4
+	la $a0, ap
+	syscall
+	
+	li $v0, 1
+	move $a0, $t4
+	syscall
+	
+	li $v0, 10
+	syscall
+	

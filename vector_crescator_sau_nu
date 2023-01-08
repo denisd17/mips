@@ -1,0 +1,61 @@
+.data
+	v: .space 400		#vector ce poate tine pana la 100 de elemente
+	str1: .asciiz "Introduceti dimensiunea vectorului: "
+	str2: .asciiz "Vectorul citit de la tastatura este: "
+	str3: .asciiz " "
+.text
+
+data:
+	la $a0, str1		#mesajul de intro
+	li $v0, 4
+	syscall
+	
+	li $v0, 5		#citirea dimensiunii vectorului
+	syscall
+	move $t0, $v0		#copiem dim in registrul t0
+	
+	li $t1, 0		#contor
+	li $t2, 0		#index
+	
+loop:
+	beq $t1, $t0, afis
+	
+	li $v0, 5		#citim el ce urmeaza a fi stocat in vector
+	syscall
+	
+	sw $v0, v($t2)		#stocam elementul in vector
+	
+	addi $t1, $t1, 1
+	addi $t2, $t2, 4
+	
+	j loop
+	
+afis:
+	la $a0, str2
+	li $v0, 4
+	syscall
+	
+	li $t1, 0
+	li $t2, 0
+	
+loop2:
+	beq $t1, $t0, exit
+	
+	lw $a0, v($t2)
+	li $v0, 1
+	syscall
+	
+	la $a0, str3
+	li $v0, 4
+	syscall
+	
+	addi $t1, $t1, 1
+	addi $t2, $t2, 4
+	
+	j loop2
+	
+exit:
+	li $v0, 10
+	syscall
+	
+	

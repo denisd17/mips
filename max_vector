@@ -1,0 +1,46 @@
+.data
+	v: .word 1, 3, 4, 5, 10, 10
+	n: .word 6
+	crescator: .asciiz "Da, vectorul este sortat crescator"
+	nue: .asciiz "Nu, vectorul nu este sortat crescator"
+.text
+
+data:
+	lw $t0, n 	#stocam in t0 lungimea n a vectorului
+	li $t1, 1	#contor 
+	li $t2, 0	#index
+	
+	lw $t3, v($t2) 	#incarcam in t3 primul el al vectorului
+	
+	addi $t2, $t2, 4 #adaugam 4 la contorul ptr adrese
+	
+loop:
+	beq $t1, $t0, da
+	
+	lw $t4, v($t2)
+	
+	ble $t4, $t3, nu
+	
+	move $t3, $t4
+	addi $t2, $t2, 4
+	addi $t1, $t1, 1
+	
+	j loop
+	
+da :
+	li $v0, 4
+	la $a0, crescator
+	syscall
+	
+	j exit
+
+nu :
+	li $v0, 4
+	la $a0, nue
+	syscall
+	
+	j exit
+	
+exit :
+	li $v0, 10
+	syscall

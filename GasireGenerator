@@ -1,0 +1,78 @@
+.data
+	caz1: .asciiz "Numarul p introdus nu este numar prim!"
+	generatorgasit: .asciiz "Cel mai mic generator este: "
+	generatornegasit: .asciiz "Nu exista generatori!"
+.text
+main:
+	li $v0, 5		#incarcam registrul v0 cu codul de apel sistem 5, pentru a citi numarul p
+	syscall
+	
+	move $t0, $v0		#copiem valoarea numarului p din registrul v0 in registrul temporar t0
+	
+	blt $t0, 2, nonprim	#verificam ca numarul p sa fie cel putin egal cu doi, in caz contrar acesta nu este prim
+	
+	move $t1, $t0		#copiem valoarea numarului p din registrul t0 in registrul t1
+	div $t1, $t1, 2		
+	addi $t1, $t1, 1	#acum registrul t1 va stoca valoarea (p/2) + 1, vom cauta divizori in intervalul [2,p/2]
+	li $t2, 2		#vom folosi registrul t2 pentru a stoca in acesta valorile potentialilor divizori ai lui p
+	
+loop:
+	beq $t2, $t1, prim	#daca nu gasim divizorii in intervalul [2,p/2] inseamna ca numarul este prim
+	
+	rem $t3, $t0, $t2	#stocam in registrul t3 valoarea restului impartirii lui p la potentialul divizor 
+	
+	beq $t3, 0, nonprim	#in cazul in care restul impartirii este 0, deci p se imparte exact, am gasit un divizor deci p nu e prim
+	
+	addi $t2, $t2, 1	#in caz contrar, trecem la numarul urmator pentru care vom face verificarea
+	
+	j loop			#sare la inceputul lui loop:
+	
+
+nonprim:
+	li $v0, 4		#incarcam registrul v0 cu codul de apel sistem 4, pentru a afisa un mesaj pe ecran
+	la $a0, caz1		#incarcam registrul a0 cu adresa sirului de caractere ce urmeaza a fi afisat
+	syscall
+	
+	j exit			#sare la exit, care va opri rularea programului
+	
+prim:
+	li $t1, 2		#in t1 vom stoca posibilele valori ale generatorului g, evident incepem verificarea de la 2
+loop_generator:
+	beq $t1, $t0, nongenerator	#vom cauta valorile generatorului g in intervalul [2,p-1]
+	li $t2, 1			#in t2 vom stoca ordinul elementului g
+	move $t3, $t1			#folosit pentru operatiile de ridicare la putere
+loop_puteri:
+	beq $t3, 1, loop_generatorc		#in cazul in care g ridicat la o putere este egal cu 1, in continuare doar se va repeta secventa de valori generate
+	
+	mul $t3, $t3, $t1		#ridicam numarul g la urmatoarea putere
+	rem $t3, $t3, $t0		#aplicam mod p
+	
+	
+	addi $t2, $t2, 1		#am determinat ca ordinul elementului este cel putin cu 1 mai mare decat valoarea anterioara
+	
+	j loop_puteri			#sare la loop_puteri
+loop_generatorc:
+	addi $t2, $t2, 1		#adaugam 1 la ord(g) pentru a compara ord(g) + 1 cu ord(grup) + 1.Ord(grup) este egal cu p-1, dar dorim evitarea modificarii valorii stocate in registrul t0
+	beq $t2, $t0, generator		#in cazul in care ord(g) = ord(grup), am gasit generatorul
+	addi $t1, $t1, 1
+	j loop_generator
+
+generator:
+	li $v0, 4
+	la $a0, generatorgasit
+	syscall
+	
+	move $a0, $t1
+	li $v0, 1
+	syscall
+	
+	li $v0, 10
+	syscall
+
+nongenerator:
+	li $v0, 10
+	syscall
+exit:
+	li $v0, 10
+	syscall
+	
